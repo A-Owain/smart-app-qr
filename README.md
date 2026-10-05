@@ -1,12 +1,15 @@
 # Smart App QR Generator
 
-GitHub Pages-ready generator for one QR code that routes iPhone users to the App Store and Android users to Google Play.
+A GitHub Pages QR generator that creates one QR code for iOS and Android.
 
-## Use
-1. Open the GitHub Pages site.
-2. Enter app name, App Store URL, and Google Play URL.
-3. Generate the redirect file and QR.
-4. Upload the redirect HTML into the `redirects/` folder.
+## How it works
 
-## Pages
-Enable GitHub Pages from Settings → Pages → Deploy from branch → main / root.
+The repository contains one permanent `redirect.html`. The generator places the App Store and Google Play URLs in the QR's redirect URL as parameters.
+
+No per-app HTML file uploads are required.
+
+- iPhone / iPad → App Store
+- Android → Google Play
+- Desktop / unknown device → fallback URL or store-choice page
+
+The generator can download QR codes as PNG or SVG.
