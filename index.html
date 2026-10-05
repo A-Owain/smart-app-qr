@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart App QR Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#111827;padding:40px 20px}.wrap{max-width:860px;margin:auto}.card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:28px;box-shadow:0 12px 35px rgba(17,24,39,.08)}h1{margin:0 0 8px;font-size:30px}p{color:#6b7280;line-height:1.55}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:700px){.grid{grid-template-columns:1fr}}label{display:block;font-size:14px;font-weight:700;margin:16px 0 7px}input{width:100%;padding:13px 14px;border:1px solid #d1d5db;border-radius:10px;font-size:15px}button{width:100%;border:0;border-radius:10px;padding:14px 16px;font-weight:700;font-size:15px;cursor:pointer;margin-top:14px;background:#111827;color:#fff}.secondary{background:#eef0f4;color:#111827}.box{margin-top:22px;padding:18px;border:1px solid #e5e7eb;border-radius:12px;background:#fafafa}.url{word-break:break-all;font-family:monospace;background:#fff;border:1px solid #e5e7eb;padding:12px;border-radius:8px;font-size:13px}.small{font-size:13px}.hidden{display:none}#qrcode{display:flex;justify-content:center;padding:22px 0 8px}
+  </style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+<h1>Smart App QR Generator</h1>
+<p>Create one QR code that opens the App Store on iPhone and Google Play on Android.</p>
+<div class="grid"><div><label>GitHub Username</label><input id="username" value="A-Owain"></div><div><label>Repository Name</label><input id="repo" value="smart-app-qr"></div></div>
+<label>App Name</label><input id="appName" placeholder="Tawuniya">
+<label>App Store URL</label><input id="ios" placeholder="https://apps.apple.com/...">
+<label>Google Play URL</label><input id="android" placeholder="https://play.google.com/store/apps/details?id=...">
+<label>Fallback URL (optional)</label><input id="fallback" placeholder="https://yourwebsite.com">
+<button onclick="build()">Generate Smart QR Package</button>
+<div id="result" class="hidden">
+<div class="box"><h2>1. Redirect file</h2><p class="small">Download this file and upload it into the repo's <b>redirects</b> folder.</p><button class="secondary" onclick="downloadRedirect()">Download Redirect HTML</button><div id="filenameStatus" class="small"></div></div>
+<div class="box"><h2>2. Final GitHub Pages URL</h2><div id="finalUrl" class="url"></div></div>
+<div class="box"><h2>3. QR Code</h2><div id="qrcode"></div><button class="secondary" onclick="downloadQR()">Download QR PNG</button></div>
+</div></div></div>
+<script>
+let redirectHtml='',slug='',finalUrl='';
+function slugify(t){return t.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'app'}
+function esc(s){return s.replace(/\\/g,'\\\\').replace(/"/g,'\\\"')}
+function build(){
+const username=document.getElementById('username').value.trim(),repo=document.getElementById('repo').value.trim(),appName=document.getElementById('appName').value.trim(),ios=document.getElementById('ios').value.trim(),android=document.getElementById('android').value.trim(),fallback=document.getElementById('fallback').value.trim()||ios||android;
+if(!username||!repo||!appName||!ios||!android){alert('Please fill all required fields.');return}
+slug=slugify(appName); finalUrl=`https://${username}.github.io/${repo}/redirects/${slug}.html`;
+redirectHtml=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${appName}</title><script>const iosLink="${esc(ios)}",androidLink="${esc(android)}",fallbackLink="${esc(fallback)}";const ua=navigator.userAgent||navigator.vendor||window.opera;if(/android/i.test(ua)){location.replace(androidLink)}else if(/iPad|iPhone|iPod/.test(ua)&&!window.MSStream){location.replace(iosLink)}else{location.replace(fallbackLink)}<\/script></head><body><p>Redirecting...</p></body></html>`;
+document.getElementById('finalUrl').textContent=finalUrl;document.getElementById('filenameStatus').textContent='File: redirects/'+slug+'.html';const q=document.getElementById('qrcode');q.innerHTML='';new QRCode(q,{text:finalUrl,width:280,height:280,correctLevel:QRCode.CorrectLevel.H});document.getElementById('result').classList.remove('hidden')}
+function downloadRedirect(){if(!redirectHtml)return;const b=new Blob([redirectHtml],{type:'text/html'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=slug+'.html';a.click();URL.revokeObjectURL(u)}
+function downloadQR(){const q=document.getElementById('qrcode'),c=q.querySelector('canvas'),i=q.querySelector('img');const d=c?c.toDataURL('image/png'):i?i.src:'';if(!d)return;const a=document.createElement('a');a.href=d;a.download=slug+'-qr.png';a.click()}
+</script></body></html>
