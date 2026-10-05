@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Opening app…</title>
+  <style>
+    body{font-family:Arial,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;background:#f7f7f7;color:#111}
+    .card{background:#fff;padding:28px;border-radius:16px;max-width:420px;width:calc(100% - 40px);text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+    a{display:block;margin-top:12px;padding:12px;border-radius:10px;background:#111;color:#fff;text-decoration:none}
+  </style>
+</head>
+<body>
+<div class="card" id="fallbackUI">
+  <p>Opening the correct app store…</p>
+</div>
+<script>
+  const params = new URLSearchParams(location.search);
+  const ios = params.get('ios');
+  const android = params.get('android');
+  const fallback = params.get('fallback');
+
+  function safeUrl(value){
+    if(!value) return null;
+    try{
+      const url = new URL(value);
+      return (url.protocol === 'https:' || url.protocol === 'http:') ? url.toString() : null;
+    }catch(e){ return null; }
+  }
+
+  const iosUrl = safeUrl(ios);
+  const androidUrl = safeUrl(android);
+  const fallbackUrl = safeUrl(fallback);
+  const ua = navigator.userAgent || navigator.vendor || '';
+  const isAndroid = /android/i.test(ua);
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  if(isAndroid && androidUrl){
+    location.replace(androidUrl);
+  }else if(isIOS && iosUrl){
+    location.replace(iosUrl);
+  }else if(fallbackUrl){
+    location.replace(fallbackUrl);
+  }else{
+    const box = document.getElementById('fallbackUI');
+    box.innerHTML = '<p>Choose your app store:</p>' +
+      (iosUrl ? '<a href="' + iosUrl.replace(/"/g,'&quot;') + '">App Store</a>' : '') +
+      (androidUrl ? '<a href="' + androidUrl.replace(/"/g,'&quot;') + '">Google Play</a>' : '');
+  }
+</script>
+</body>
+</html>
